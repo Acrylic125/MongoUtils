@@ -10,19 +10,18 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class IterableQuery<T> implements Query<T> {
+public class CollectionQuery<T> implements Query<T> {
 
-    private final Iterator<T> iterator;
+    private final Collection<T> collection;
     private List<Predicate<T>> filters;
 
-    public IterableQuery(Iterator<T> iterator) {
-        this.iterator = iterator;
+    public CollectionQuery(Collection<T> collection) {
+        this.collection = collection;
     }
 
     @Override
     public @Nullable T queryFirst() {
-        while (iterator.hasNext()) {
-            T obj = iterator.next();
+        for (T obj : collection) {
             if (matchesWithFilters(obj))
                 return obj;
         }
@@ -31,8 +30,7 @@ public class IterableQuery<T> implements Query<T> {
 
     @Override
     public void queryAndIterate(@NotNull Consumer<T> action) {
-        while (iterator.hasNext()) {
-            T obj = iterator.next();
+        for (T obj : collection) {
             if (matchesWithFilters(obj))
                 action.accept(obj);
         }
@@ -57,5 +55,4 @@ public class IterableQuery<T> implements Query<T> {
     public @Nullable Collection<Predicate<T>> getFilters() {
         return filters;
     }
-
 }

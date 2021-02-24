@@ -16,27 +16,20 @@ public interface Query<T> {
 
     Collection<T> queryAll();
 
-    /**
-     *
-     *
-     * @param condition The condition.
-     * @param matchWith The value to compare with.
-     * @return this.
-     */
-    Query<T> filter(@NotNull String condition, Object matchWith);
-
     Query<T> filter(@NotNull Predicate<T> filter);
 
     @Nullable
     Collection<Predicate<T>> getFilters();
 
-    void startQuerying();
-
     default boolean matchesWithFilters(T object) {
-        
-        for (Predicate<T> filter : getFilters()) {
-
+        Collection<Predicate<T>> filters = getFilters();
+        if (filters != null) {
+            for (Predicate<T> filter : filters) {
+                if (!filter.test(object))
+                    return false;
+            }
         }
+        return true;
     }
 
 }
