@@ -5,11 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DocumentClassLoader<T, TDocument> {
 
-    @NotNull
-    DocumentCollection<TDocument> getRoot();
+    void save(@NotNull DocumentCollection<TDocument> collection, @NotNull T entity);
 
-    void save(@NotNull T entity);
-
-    void load(@NotNull TDocument tResult);
+    void load(@NotNull DocumentCollection<TDocument> collection, @NotNull TDocument tResult);
 
 }

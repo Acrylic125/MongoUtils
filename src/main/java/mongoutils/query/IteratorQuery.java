@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class IterableQuery<T> implements Query<T> {
+public class IteratorQuery<T> implements Query<T> {
 
     private final Iterator<T> iterator;
     private List<Predicate<T>> filters;
 
-    public IterableQuery(Iterator<T> iterator) {
+    public IteratorQuery(Iterator<T> iterator) {
+
         this.iterator = iterator;
     }
 

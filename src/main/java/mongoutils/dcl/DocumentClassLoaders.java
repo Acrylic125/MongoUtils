@@ -1,16 +1,17 @@
 package mongoutils.dcl;
 
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public interface DocumentClassLoaders<TDocument> {
+public interface DocumentClassLoaders {
 
     @NotNull
-    Map<Class<?>, DocumentClassLoader<?, TDocument>> getLoaders();
+    Map<Class<?>, DocumentClassLoader<?, Document>> getLoaders();
 
-    void addLoader(DocumentClassLoader<?, TDocument> loader);
+    void addLoader(DocumentClassLoader<?, Document> loader);
 
-
+    <Loader> DocumentClassLoader<Loader, Document> getLoader(Class<Loader> loadType);
 
 }
