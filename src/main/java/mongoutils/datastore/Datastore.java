@@ -2,13 +2,13 @@ package mongoutils.datastore;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import mongoutils.MongoUtils;
+import com.mongodb.client.model.InsertOneOptions;
 import mongoutils.query.DocumentQuery;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 public interface Datastore {
 
@@ -30,20 +30,40 @@ public interface Datastore {
 
     <T> DocumentQuery<T> query(@NotNull Class<T> clazz);
 
-    <T> void save(@NotNull String collectionName, @NotNull T object);
+    <T> void save(@NotNull String collectionName, @NotNull T object, @Nullable SaveOptions options);
 
-    <T> void save(@NotNull T object);
+    default <T> void save(@NotNull String collectionName, @NotNull T object) {
+        save(collectionName, object, null);
+    }
 
-    <T> void saveAll(@NotNull String collectionName, @NotNull T... objects);
+    <T> void save(@NotNull T object, @Nullable SaveOptions options);
 
-    <T> void saveAll(@NotNull T... objects);
+    default <T> void save(@NotNull T object) {
+        save(object, null);
+    }
 
-    <T> void saveAll(@NotNull String collectionName, @NotNull Collection<T> objects);
+    <T> void saveAll(@NotNull String collectionName, @Nullable SaveOptions options, @NotNull T... objects);
 
-    <T> void saveAll(@NotNull Collection<T> objects);
+    default <T> void saveAll(@NotNull String collectionName, @NotNull T... objects) {
+        saveAll(collectionName, null, objects);
+    }
 
-    <T> void saveAll(@NotNull String collectionName, @NotNull Iterator<T> objects);
+    <T> void saveAll(@Nullable SaveOptions options, @NotNull T... objects);
 
-    <T> void saveAll(@NotNull Iterator<T> objects);
+    default <T> void saveAll(@NotNull T... objects) {
+        saveAll((InsertOneOptions) null, objects);
+    }
+
+    <T> void saveAll(@NotNull String collectionName, @NotNull Collection<T> objects, @Nullable SaveOptions options);
+
+    default <T> void saveAll(@NotNull String collectionName, @NotNull Collection<T> objects) {
+        saveAll(collectionName, objects, null);
+    }
+
+    <T> void saveAll(@NotNull Collection<T> objects, @Nullable SaveOptions options);
+
+    default <T> void saveAll(@NotNull Collection<T> objects) {
+        saveAll(objects, null);
+    }
 
 }

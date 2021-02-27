@@ -16,7 +16,6 @@ public class IteratorQuery<T> implements Query<T> {
     private List<Predicate<T>> filters;
 
     public IteratorQuery(Iterator<T> iterator) {
-
         this.iterator = iterator;
     }
 

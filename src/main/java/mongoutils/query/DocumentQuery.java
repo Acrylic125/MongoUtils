@@ -53,7 +53,7 @@ public class DocumentQuery<TDocument> implements Query<TDocument> {
     }
 
     public DocumentQuery<TDocument> filterID(@NotNull Object id) {
-        return filter(Filters.eq(new ObjectId(id.toString())));
+        return filter(Filters.eq(id));
     }
 
     @Override

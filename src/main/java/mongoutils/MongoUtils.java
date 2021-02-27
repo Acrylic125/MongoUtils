@@ -8,12 +8,12 @@ import com.mongodb.client.MongoClients;
 import mongoutils.annotations.Pojo;
 import mongoutils.datastore.Datastore;
 import mongoutils.datastore.SimpleDatastore;
+import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.codecs.pojo.annotations.BsonDiscriminator;
-import org.bson.codecs.pojo.annotations.BsonProperty;
-import org.bson.types.ObjectId;
+import org.bson.codecs.pojo.annotations.BsonId;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -36,6 +36,7 @@ public class MongoUtils {
         CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
                 CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
         return MongoClientSettings.builder()
+                .uuidRepresentation(UuidRepresentation.STANDARD)
                 .codecRegistry(pojoCodecRegistry)
                 .retryReads(true)
                 .retryWrites(true);
@@ -71,78 +72,8 @@ public class MongoUtils {
         String url = "mongodb://localhost:27017"; //"mongodb+srv://UserTest:UserTestPW@acrylic.f7wea.gcp.mongodb.net/test?retryWrites=true&w=majority";
 
         MongoUtils mongoUtils = new MongoUtils(url);
-        Datastore datastore = mongoUtils.createDatastore("cancel");
-        Test test1 = new Test();
-        test1.map.put("Obj1", new Concrete());
-        test1.map.put("Obj2", new Forgery());
-        datastore.save(test1);
-        Test queried = datastore.query(Test.class)
-                .filterID("6039fdff15278b67b53f5077")
-                .queryFirst();
-        System.out.println(queried);
-        if (queried != null) {
-            queried.horny = "Updated";
-            datastore.save(queried);
-        }
-    }
-
-    @BsonDiscriminator
-    public interface Abstract {
 
     }
 
-    @BsonDiscriminator
-    public static class Concrete implements Abstract {
-
-        public int cunt = 1000;
-        public String gay = "Hello";
-        public boolean fag = true;
-
-        @Override
-        public String toString() {
-            return "Concrete{" +
-                    "cunt=" + cunt +
-                    ", gay='" + gay + '\'' +
-                    ", fag=" + fag +
-                    '}';
-        }
-    }
-
-    @BsonDiscriminator
-    public static class Forgery implements Abstract {
-        public int forge = 69;
-        public double iq = 120;
-
-        @Override
-        public String toString() {
-            return "Forgery{" +
-                    "forge=" + forge +
-                    ", iq=" + iq +
-                    '}';
-        }
-    }
-
-
-    @BsonDiscriminator
-    @Pojo(collectionName = "Best")
-    public static class Test {
-
-        public ObjectId id = new ObjectId();
-        public long testlong = 68188;
-        public double gay = 4423133;
-        public String horny = "I am not horny!";
-        @BsonProperty(useDiscriminator = true)
-        public Map<String, Abstract> map = new HashMap<>();
-
-        @Override
-        public String toString() {
-            return "Test{" +
-                    "testlong=" + testlong +
-                    ", gay=" + gay +
-                    ", horny='" + horny + '\'' +
-                    ", map=" + map +
-                    '}';
-        }
-    }
 
 }

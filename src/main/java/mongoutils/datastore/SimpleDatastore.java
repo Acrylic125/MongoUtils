@@ -9,11 +9,9 @@ import mongoutils.annotations.Pojo;
 import mongoutils.query.DocumentQuery;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -64,16 +62,6 @@ public class SimpleDatastore implements Datastore {
         return new DocumentQuery<>(getMongoCollection(clazz));
     }
 
-    private <T> void save(@NotNull T object, @NotNull MongoCollection<T> collection) {
-        ObjectId id = getObjectID(object);
-        T check = collection.find(Filters.eq(id)).first();
-        if (check == null) {
-            collection.insertOne(object);
-        } else {
-            collection.replaceOne(Filters.eq(id), object);
-        }
-    }
-
     @SuppressWarnings("all")
     private <T> MongoCollection<T> getCollectionFromObject(@NotNull T object) {
         return (MongoCollection<T>) getCollectionFromClass(object.getClass());
@@ -93,66 +81,78 @@ public class SimpleDatastore implements Datastore {
         return (MongoCollection<T>) getMongoCollection(name, clazz);
     }
 
-    private <T> void saveByObject(@NotNull T object) {
-        save(object, getCollectionFromObject(object));
+    private <T> void saveWithMongoCollection(@NotNull T object, @NotNull MongoCollection<T> collection) {
+        saveWithMongoCollection(object, collection, null);
     }
 
-    @Override
     @SuppressWarnings("all")
-    public <T> void save(@NotNull String collectionName, @NotNull T object) {
-        MongoCollection<T> collection = (MongoCollection<T>) getMongoCollection(collectionName, object.getClass());
-        save(object, collection);
-    }
-
-    @Override
-    public <T> void save(@NotNull T object) {
-        saveByObject(object);
-    }
-
-    @Override
-    public <T> void saveAll(@NotNull String collectionName, @NotNull T... objects) {
-        saveAll(collectionName, Arrays.asList(objects));
-    }
-
-    @Override
-    public <T> void saveAll(@NotNull T... objects) {
-
-    }
-
-    @Override
-    public <T> void saveAll(@NotNull String collectionName, @NotNull Collection<T> objects) {
-        saveAll(collectionName, objects.iterator());
-    }
-
-    @Override
-    public <T> void saveAll(@NotNull Collection<T> objects) {
-
-    }
-
-    @Override
-    @SuppressWarnings("all")
-    public <T> void saveAll(@NotNull String collectionName, @NotNull Iterator<T> objects) {
-        Map<Class<?>, MongoCollection<?>> collectionMap = new HashMap<>();
-        while (objects.hasNext()) {
-            T obj = objects.next();
-            Class<?> type = obj.getClass();
-            MongoCollection<T> collection = (MongoCollection<T>) collectionMap.get(obj.getClass());
-            if (collection == null) {
-                collection = (MongoCollection<T>) getMongoCollection(collectionName, type);
-                collectionMap.put(type, collection);
+    private <T> void saveWithMongoCollection(@NotNull T object, @NotNull MongoCollection<T> collection, @Nullable SaveOptions options) {
+        Object id = getObjectID(object);
+        T check = collection.find(Filters.eq(id)).first();
+        if (check == null) {
+            if (options != null && options.isUsingInsertOneOptions()) {
+                collection.insertOne(object, options.getInsertOneOptions());
+            } else {
+                collection.insertOne(object);
             }
-            save(obj, collection);
+        } else {
+            if (options != null && options.isUsingReplaceOptions()) {
+                collection.replaceOne(Filters.eq(id), object, options.getReplaceOptions());
+            } else {
+                collection.replaceOne(Filters.eq(id), object);
+            }
         }
     }
 
     @Override
-    public <T> void saveAll(@NotNull Iterator<T> objects) {
+    @SuppressWarnings("all")
+    public <T> void save(@NotNull String collectionName, @NotNull T object, @Nullable SaveOptions options) {
+        saveWithMongoCollection(object, (MongoCollection<T>) getMongoCollection(collectionName, object.getClass()), options);
+    }
 
+    @Override
+    @SuppressWarnings("all")
+    public <T> void save(@NotNull T object, @Nullable SaveOptions options) {
+        saveWithMongoCollection(object, (MongoCollection<T>) getCollectionFromClass(object.getClass()), options);
+    }
+
+    @Override
+    public <T> void saveAll(@NotNull String collectionName, @Nullable SaveOptions options, @NotNull T... objects) {
+        saveAll(collectionName, Arrays.asList(objects), options);
+    }
+
+    @Override
+    public <T> void saveAll(@Nullable SaveOptions options, @NotNull T... objects) {
+        saveAll(Arrays.asList(objects), options);
+    }
+
+    @Override
+    public <T> void saveAll(@NotNull String collectionName, @NotNull Collection<T> objects, @Nullable SaveOptions options) {
+        saveCollection(collectionName, objects, options);
+    }
+
+    @Override
+    public <T> void saveAll(@NotNull Collection<T> objects, @Nullable SaveOptions options) {
+        saveCollection(null, objects, options);
+    }
+
+    @SuppressWarnings("all")
+    private <T> void saveCollection(@Nullable String collectionName, @NotNull Collection<T> objects, @Nullable SaveOptions options) {
+        Map<Class<?>, MongoCollection<?>> collectionMap = new HashMap<>();
+        for (T obj : objects) {
+            Class<?> type = obj.getClass();
+            MongoCollection<T> collection = (MongoCollection<T>) collectionMap.get(type);
+            if (collection == null) {
+                collection = (MongoCollection<T>) ((collectionName == null) ? getCollectionFromClass(type) : getMongoCollection(collectionName, type));
+                collectionMap.put(type, collection);
+            }
+            saveWithMongoCollection(obj, collection, options);
+        }
     }
 
     @Nullable
-    private <T> ObjectId getObjectID(@NotNull T obj) {
-        ObjectId possibleID = null;
+    private <T> Object getObjectID(@NotNull T obj) {
+        Object possibleID = null;
         boolean foundID = false;
         Class<?> clazz = obj.getClass();
         for (Field declaredField : clazz.getDeclaredFields()) {
@@ -162,13 +162,11 @@ public class SimpleDatastore implements Datastore {
                     if (value == null) {
                         possibleID = null;
                     } else {
-                        validateObjectID(value);
-                        possibleID = (ObjectId) value;
+                        possibleID = value;
                         foundID = true;
                     }
                 } else if (declaredField.getAnnotation(BsonId.class) != null) {
-                    validateObjectID(value);
-                    return (ObjectId) value;
+                    return value;
                 }
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
@@ -178,11 +176,5 @@ public class SimpleDatastore implements Datastore {
             throw new RuntimeException("No object id was found in " + clazz + ". Either annotate the ObjectId variable as @BsonId or have an ObjectId variable named id.");
         return possibleID;
     }
-
-    private void validateObjectID(Object obj) {
-        if (!(obj instanceof ObjectId))
-            throw new RuntimeException("The id must be an ObjectId object.");
-    }
-
 
 }
