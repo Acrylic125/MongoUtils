@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="MongoUtils:jar">
+    <output-path>$PROJECT_DIR$/../../../output</output-path>
+    <root id="archive" name="MongoUtils.jar">
+      <element id="module-output" name="MongoUtils" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mongodb/mongodb-driver-core/4.1.2/mongodb-driver-core-4.1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mongodb/bson/4.1.2/bson-4.1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jetbrains/annotations/20.1.0/annotations-20.1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mongodb/mongodb-driver-legacy/4.1.2/mongodb-driver-legacy-4.1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mongodb/mongodb-driver-sync/4.1.2/mongodb-driver-sync-4.1.2.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

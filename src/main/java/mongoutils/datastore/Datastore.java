@@ -2,7 +2,6 @@ package mongoutils.datastore;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertOneOptions;
 import mongoutils.query.DocumentQuery;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;

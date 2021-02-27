@@ -2,6 +2,8 @@ package mongoutils.testing;
 
 import org.bson.codecs.pojo.annotations.BsonId;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,7 +76,7 @@ public class Car {
     }
 
     public Car addComponents(CarComponent... components) {
-        this.components.addAll(List.of(components));
+        this.components.addAll(Arrays.asList(components));
         return this;
     }
 
