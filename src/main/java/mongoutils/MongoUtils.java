@@ -2,12 +2,10 @@ package mongoutils;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import dev.morphia.DatastoreImpl;
+import mongoutils.annotations.Pojo;
 import mongoutils.datastore.Datastore;
 import mongoutils.datastore.SimpleDatastore;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -25,6 +23,14 @@ public class MongoUtils {
 
     private final MongoClient mongoClient;
 
+    public static MongoUtils connectByURL(@NotNull String url) {
+        return new MongoUtils(url);
+    }
+
+    public static MongoUtils connectByCredential(@NotNull MongoCredential credential) {
+        return new MongoUtils(credential);
+    }
+
     @NotNull
     private static MongoClientSettings.Builder generateDefaultSettings() {
         CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
@@ -33,6 +39,11 @@ public class MongoUtils {
                 .codecRegistry(pojoCodecRegistry)
                 .retryReads(true)
                 .retryWrites(true);
+    }
+
+
+    private MongoUtils(@NotNull MongoCredential credential) {
+        this(generateDefaultSettings().credential(credential).build());
     }
 
     private MongoUtils(@NotNull String url) {
@@ -56,21 +67,17 @@ public class MongoUtils {
         return new SimpleDatastore(this, databaseName);
     }
 
-    public static MongoUtils connectByURL(@NotNull String url) {
-        return new MongoUtils(MongoClients.create(url));
-    }
-
     public static void main(String[] args) {
         String url = "mongodb://localhost:27017"; //"mongodb+srv://UserTest:UserTestPW@acrylic.f7wea.gcp.mongodb.net/test?retryWrites=true&w=majority";
 
         MongoUtils mongoUtils = new MongoUtils(url);
-        Datastore datastore = mongoUtils.createDatastore("test");
+        Datastore datastore = mongoUtils.createDatastore("cancel");
         Test test1 = new Test();
         test1.map.put("Obj1", new Concrete());
         test1.map.put("Obj2", new Forgery());
         datastore.save(test1);
         Test queried = datastore.query(Test.class)
-                .filterID("6039fb5765d0fa12f10549ea")
+                .filterID("6039fdff15278b67b53f5077")
                 .queryFirst();
         System.out.println(queried);
         if (queried != null) {
@@ -117,6 +124,7 @@ public class MongoUtils {
 
 
     @BsonDiscriminator
+    @Pojo(collectionName = "Best")
     public static class Test {
 
         public ObjectId id = new ObjectId();

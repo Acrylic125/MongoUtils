@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -65,7 +66,6 @@ public class SimpleDatastore implements Datastore {
 
     private <T> void save(@NotNull T object, @NotNull MongoCollection<T> collection) {
         ObjectId id = getObjectID(object);
-        System.out.println(id + " Saved " + collection.getNamespace());
         T check = collection.find(Filters.eq(id)).first();
         if (check == null) {
             collection.insertOne(object);
@@ -84,7 +84,7 @@ public class SimpleDatastore implements Datastore {
         Pojo pojo = clazz.getAnnotation(Pojo.class);
         String name;
         if (pojo == null) {
-            name = clazz.getSimpleName();
+            name = clazz.getSimpleName().toLowerCase(Locale.ROOT);
         } else {
             name = pojo.collectionName();
             if (name == AnnotationConstants.USE_DEFAULT)
