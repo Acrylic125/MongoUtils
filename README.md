@@ -14,3 +14,36 @@
  not be maintained after completion of said project.
  Use it at your own risk!
  
+ [![](https://jitpack.io/v/Acrylic125/MongoUtils.svg)](https://jitpack.io/#Acrylic125/MongoUtils)
+ 
+ Gradle
+ ```xml
+allprojects {
+repositories {
+   ...
+  maven { url 'https://jitpack.io' }
+  }
+}
+ ...
+dependencies {
+  implementation 'com.github.Acrylic125:MongoUtils:v1.0b'
+}
+```
+
+Maven:
+```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+...
+<dependencies>
+  <dependency>
+    <groupId>com.github.Acrylic125</groupId>
+    <artifactId>MongoUtils</artifactId>
+    <version>v1.0b</version>
+  </dependency>
+</dependencies>
+```
