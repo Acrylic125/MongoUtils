@@ -156,6 +156,7 @@ public class SimpleDatastore implements Datastore {
         boolean foundID = false;
         Class<?> clazz = obj.getClass();
         for (Field declaredField : clazz.getDeclaredFields()) {
+            declaredField.setAccessible(true);
             try {
                 Object value = declaredField.get(obj);
                 if (declaredField.getName().equals("id")) {
@@ -171,6 +172,7 @@ public class SimpleDatastore implements Datastore {
             } catch (IllegalAccessException ex) {
                 ex.printStackTrace();
             }
+            declaredField.setAccessible(false);
         }
         if (!foundID)
             throw new RuntimeException("No object id was found in " + clazz + ". Either annotate the ObjectId variable as @BsonId or have an ObjectId variable named id.");

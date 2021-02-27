@@ -8,6 +8,7 @@ import com.mongodb.client.MongoClients;
 import mongoutils.annotations.Pojo;
 import mongoutils.datastore.Datastore;
 import mongoutils.datastore.SimpleDatastore;
+import mongoutils.testing.CarFactory;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -72,7 +73,8 @@ public class MongoUtils {
         String url = "mongodb://localhost:27017"; //"mongodb+srv://UserTest:UserTestPW@acrylic.f7wea.gcp.mongodb.net/test?retryWrites=true&w=majority";
 
         MongoUtils mongoUtils = new MongoUtils(url);
-
+        Datastore datastore = mongoUtils.createDatastore("cars");
+        datastore.save(CarFactory.getDeliveryCar());
     }
 
 
