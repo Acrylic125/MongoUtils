@@ -64,11 +64,11 @@ public class MongoUtils {
     }
 
     public static void main(String[] args) {
-        String url = "mongodb://localhost:27017"; //"mongodb+srv://UserTest:UserTestPW@acrylic.f7wea.gcp.mongodb.net/test?retryWrites=true&w=majority";
+        /**String url = "mongodb://localhost:27017";
 
         MongoUtils mongoUtils = new MongoUtils(url);
         Datastore datastore = mongoUtils.createDatastore("cars");
-        datastore.saveAll(CarFactory.getDeliveryCar(), CarFactory.getRaceCar(), CarFactory.getNewSimpleCar());
+        datastore.saveAll(CarFactory.getDeliveryCar(), CarFactory.getRaceCar(), CarFactory.getNewSimpleCar());**/
     }
 
 
