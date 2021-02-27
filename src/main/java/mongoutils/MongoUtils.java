@@ -5,20 +5,17 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import mongoutils.annotations.Pojo;
 import mongoutils.datastore.Datastore;
 import mongoutils.datastore.SimpleDatastore;
+import mongoutils.testing.Car;
 import mongoutils.testing.CarFactory;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.codecs.pojo.annotations.BsonDiscriminator;
-import org.bson.codecs.pojo.annotations.BsonId;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 
 public class MongoUtils {
 
@@ -74,7 +71,8 @@ public class MongoUtils {
 
         MongoUtils mongoUtils = new MongoUtils(url);
         Datastore datastore = mongoUtils.createDatastore("cars");
-        datastore.save(CarFactory.getDeliveryCar());
+        datastore.saveAll(CarFactory.getDeliveryCar(), CarFactory.getRaceCar(), CarFactory.getNewSimpleCar());
+
     }
 
 

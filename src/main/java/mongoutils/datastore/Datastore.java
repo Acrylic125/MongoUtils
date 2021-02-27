@@ -51,7 +51,7 @@ public interface Datastore {
     <T> void saveAll(@Nullable SaveOptions options, @NotNull T... objects);
 
     default <T> void saveAll(@NotNull T... objects) {
-        saveAll((InsertOneOptions) null, objects);
+        saveAll((SaveOptions) null, objects);
     }
 
     <T> void saveAll(@NotNull String collectionName, @NotNull Collection<T> objects, @Nullable SaveOptions options);
