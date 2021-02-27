@@ -66,4 +66,8 @@ public interface Datastore {
         saveAll(objects, null);
     }
 
+    void dropCollection(@NotNull String collectionName);
+
+    void dropDatabase();
+
 }

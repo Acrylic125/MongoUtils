@@ -7,15 +7,12 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import mongoutils.datastore.Datastore;
 import mongoutils.datastore.SimpleDatastore;
-import mongoutils.testing.Car;
 import mongoutils.testing.CarFactory;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 public class MongoUtils {
 
@@ -72,7 +69,6 @@ public class MongoUtils {
         MongoUtils mongoUtils = new MongoUtils(url);
         Datastore datastore = mongoUtils.createDatastore("cars");
         datastore.saveAll(CarFactory.getDeliveryCar(), CarFactory.getRaceCar(), CarFactory.getNewSimpleCar());
-
     }
 
 

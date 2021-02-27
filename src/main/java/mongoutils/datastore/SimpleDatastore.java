@@ -136,6 +136,17 @@ public class SimpleDatastore implements Datastore {
         saveCollection(null, objects, options);
     }
 
+    @Override
+    public void dropCollection(@NotNull String collectionName) {
+        MongoCollection<Document> collection = getMongoCollection(collectionName);
+        collection.drop();
+    }
+
+    @Override
+    public void dropDatabase() {
+        database.drop();
+    }
+
     @SuppressWarnings("all")
     private <T> void saveCollection(@Nullable String collectionName, @NotNull Collection<T> objects, @Nullable SaveOptions options) {
         Map<Class<?>, MongoCollection<?>> collectionMap = new HashMap<>();
