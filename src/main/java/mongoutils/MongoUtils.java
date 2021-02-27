@@ -1,41 +1,59 @@
 package mongoutils;
 
-import com.mongodb.*;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.InsertOneOptions;
-import mongoutils.dcl.DocumentClassLoaders;
-import mongoutils.dcl.SimpleDocumentClassLoaders;
-import org.bson.Document;
+import com.mongodb.client.model.Filters;
+import dev.morphia.DatastoreImpl;
+import mongoutils.datastore.Datastore;
+import mongoutils.datastore.SimpleDatastore;
+import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.codecs.pojo.annotations.BsonDiscriminator;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 
-import static org.bson.codecs.configuration.CodecRegistries.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MongoUtils {
 
     private final MongoClient mongoClient;
-    private final DocumentClassLoaders classLoaders;
 
-    public MongoUtils(@NotNull MongoClient mongoClient) {
-        this(mongoClient, new SimpleDocumentClassLoaders());
+    @NotNull
+    private static MongoClientSettings.Builder generateDefaultSettings() {
+        CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+        return MongoClientSettings.builder()
+                .codecRegistry(pojoCodecRegistry)
+                .retryReads(true)
+                .retryWrites(true);
     }
 
-    public MongoUtils(@NotNull MongoClient mongoClient, @NotNull DocumentClassLoaders classLoaders) {
+    private MongoUtils(@NotNull String url) {
+        this(generateDefaultSettings().applyConnectionString(new ConnectionString(url)).build());
+    }
+
+    public MongoUtils(@NotNull MongoClientSettings mongoClientSettings) {
+        this.mongoClient = MongoClients.create(mongoClientSettings);
+    }
+
+    public MongoUtils(@NotNull MongoClient mongoClient) {
         this.mongoClient = mongoClient;
-        this.classLoaders = classLoaders;
     }
 
     public MongoClient getMongoClient() {
         return mongoClient;
     }
 
-    public DocumentClassLoaders getClassLoaders() {
-        return classLoaders;
+    @NotNull
+    public Datastore createDatastore(@NotNull String databaseName) {
+        return new SimpleDatastore(this, databaseName);
     }
 
     public static MongoUtils connectByURL(@NotNull String url) {
@@ -44,31 +62,79 @@ public class MongoUtils {
 
     public static void main(String[] args) {
         String url = "mongodb://localhost:27017"; //"mongodb+srv://UserTest:UserTestPW@acrylic.f7wea.gcp.mongodb.net/test?retryWrites=true&w=majority";
-        CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                fromProviders(PojoCodecProvider.builder().register(Test.class).automatic(true).build()));
-        MongoClient mongoClient = MongoClients.create(
-                MongoClientSettings.builder()
-                        .codecRegistry(pojoCodecRegistry)
-                        .applyConnectionString(new ConnectionString(url))
-                        .retryReads(true)
-                        .retryWrites(true)
-                        .build()
-        );
-        for (String listDatabaseName : mongoClient.listDatabaseNames()) {
-            System.out.println(listDatabaseName);
+
+        MongoUtils mongoUtils = new MongoUtils(url);
+        Datastore datastore = mongoUtils.createDatastore("test");
+        Test test1 = new Test();
+        test1.map.put("Obj1", new Concrete());
+        test1.map.put("Obj2", new Forgery());
+        datastore.save("a", test1);
+        Test queried = datastore.query("a", Test.class)
+                .filterID("6039f1d00581b22a11f047b0")
+                .queryFirst();
+        System.out.println(queried);
+        if (queried != null) {
+            queried.horny = "Updated";
+            datastore.save("a", queried);
         }
-        MongoDatabase database = mongoClient.getDatabase("test");
-        System.out.println(database);
-        MongoCollection<Test> test = database.getCollection("a", Test.class);
-        test.insertOne(new Test());
-        System.out.println(test.getDocumentClass());
     }
 
-    private static class Test {
+    @BsonDiscriminator
+    public interface Abstract {
 
-        private ObjectId id = new ObjectId();
-        private long testlong = 1000;
-        private double gay = 1000.3d;
+    }
+
+    @BsonDiscriminator
+    public static class Concrete implements Abstract {
+
+        public int cunt = 1000;
+        public String gay = "Hello";
+        public boolean fag = true;
+
+        @Override
+        public String toString() {
+            return "Concrete{" +
+                    "cunt=" + cunt +
+                    ", gay='" + gay + '\'' +
+                    ", fag=" + fag +
+                    '}';
+        }
+    }
+
+    @BsonDiscriminator
+    public static class Forgery implements Abstract {
+        public int forge = 69;
+        public double iq = 120;
+
+        @Override
+        public String toString() {
+            return "Forgery{" +
+                    "forge=" + forge +
+                    ", iq=" + iq +
+                    '}';
+        }
+    }
+
+
+    @BsonDiscriminator
+    public static class Test {
+
+        public ObjectId id = new ObjectId();
+        public long testlong = 68188;
+        public double gay = 4423133;
+        public String horny = "I am not horny!";
+        @BsonProperty(useDiscriminator = true)
+        public Map<String, Abstract> map = new HashMap<>();
+
+        @Override
+        public String toString() {
+            return "Test{" +
+                    "testlong=" + testlong +
+                    ", gay=" + gay +
+                    ", horny='" + horny + '\'' +
+                    ", map=" + map +
+                    '}';
+        }
     }
 
 }
