@@ -21,9 +21,14 @@ public interface Datastore {
     @NotNull
     MongoCollection<Document> getMongoCollection(@NotNull String collectionName);
 
+    @NotNull
+    <T> MongoCollection<T> getMongoCollection(@NotNull Class<T> clazz);
+
     <T> DocumentQuery<T> query(@NotNull String collectionName, @NotNull Class<T> clazz);
 
     DocumentQuery<Document> query(@NotNull String collectionName);
+
+    <T> DocumentQuery<T> query(@NotNull Class<T> clazz);
 
     <T> void save(@NotNull String collectionName, @NotNull T object);
 

@@ -44,6 +44,11 @@ public class SimpleDatastore implements Datastore {
     }
 
     @Override
+    public @NotNull <T> MongoCollection<T> getMongoCollection(@NotNull Class<T> clazz) {
+        return getCollectionFromClass(clazz);
+    }
+
+    @Override
     public <T> DocumentQuery<T> query(@NotNull String collectionName, @NotNull Class<T> clazz) {
         return new DocumentQuery<>(getMongoCollection(collectionName, clazz));
     }
@@ -53,9 +58,14 @@ public class SimpleDatastore implements Datastore {
         return new DocumentQuery<>(getMongoCollection(collectionName));
     }
 
+    @Override
+    public <T> DocumentQuery<T> query(@NotNull Class<T> clazz) {
+        return new DocumentQuery<>(getMongoCollection(clazz));
+    }
+
     private <T> void save(@NotNull T object, @NotNull MongoCollection<T> collection) {
         ObjectId id = getObjectID(object);
-        System.out.println(id + " Saved");
+        System.out.println(id + " Saved " + collection.getNamespace());
         T check = collection.find(Filters.eq(id)).first();
         if (check == null) {
             collection.insertOne(object);
@@ -66,11 +76,20 @@ public class SimpleDatastore implements Datastore {
 
     @SuppressWarnings("all")
     private <T> MongoCollection<T> getCollectionFromObject(@NotNull T object) {
-        Pojo pojo = object.getClass().getAnnotation(Pojo.class);
-        String name = pojo.collectionName();
-        Class<?> clazz = object.getClass();
-        if (name == AnnotationConstants.USE_DEFAULT)
-            name = clazz.getName();
+        return (MongoCollection<T>) getCollectionFromClass(object.getClass());
+    }
+
+    @SuppressWarnings("all")
+    private <T> MongoCollection<T> getCollectionFromClass(@NotNull Class<T> clazz) {
+        Pojo pojo = clazz.getAnnotation(Pojo.class);
+        String name;
+        if (pojo == null) {
+            name = clazz.getSimpleName();
+        } else {
+            name = pojo.collectionName();
+            if (name == AnnotationConstants.USE_DEFAULT)
+                name = clazz.getName();
+        }
         return (MongoCollection<T>) getMongoCollection(name, clazz);
     }
 

@@ -68,14 +68,14 @@ public class MongoUtils {
         Test test1 = new Test();
         test1.map.put("Obj1", new Concrete());
         test1.map.put("Obj2", new Forgery());
-        datastore.save("a", test1);
-        Test queried = datastore.query("a", Test.class)
-                .filterID("6039f1d00581b22a11f047b0")
+        datastore.save(test1);
+        Test queried = datastore.query(Test.class)
+                .filterID("6039fb5765d0fa12f10549ea")
                 .queryFirst();
         System.out.println(queried);
         if (queried != null) {
             queried.horny = "Updated";
-            datastore.save("a", queried);
+            datastore.save(queried);
         }
     }
 
